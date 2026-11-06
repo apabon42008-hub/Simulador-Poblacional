@@ -1,0 +1,437 @@
+\documentclass[10pt,twocolumn,letterpaper]{article}
+\usepackage[top=1.9cm,bottom=2.2cm,left=1.65cm,right=1.65cm,columnsep=0.6cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\usepackage{polyglossia}
+\setdefaultlanguage{spanish}
+\usepackage{amsmath,amssymb}
+\usepackage{icomma}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{stfloats}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\definecolor{azulinf}{HTML}{1F3B57}
+\definecolor{acentoinf}{HTML}{E08A2E}
+
+\captionsetup{font=footnotesize,labelfont=bf,labelsep=period}
+\captionsetup[table]{name=Tabla}
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\Alph{subsection}}
+\titleformat{\section}{\centering\normalsize\scshape}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\itshape}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.1ex}{0.7ex}
+\titlespacing*{\subsection}{0pt}{0.9ex}{0.4ex}
+\setlist{nosep,leftmargin=1.2em}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\footnotesize Proyecto de Aula PA5, Ecuaciones Diferenciales, UDES 2026B}
+\fancyhead[R]{\footnotesize\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\newcommand{\M}{\,\text{M}}
+
+\begin{document}
+\twocolumn[{
+\begin{center}
+{\LARGE Simulador de escenarios de población: tasa variable,\\[2pt] crecimiento hiperbólico e inercia demográfica}\\[12pt]
+{\large Juan Camilo Castaño Rojas, Leder Andrés Cortes Cortes, Giovanny Esteban Arias Córdoba, Andrés Felipe Pabón Barbosa, Camilo José Luna y Andrés}\\[3pt]
+{\small Ingeniería de Software, Universidad de Santander (UDES), Bucaramanga, Colombia}\\[2pt]
+{\small Ecuaciones Diferenciales, grupo 2, docente: Prof. Botello \quad|\quad noviembre de 2026}
+\end{center}
+\vspace{4pt}
+{\small\noindent\textbf{\textit{Resumen}}\,---En una entidad de planeación debe decidirse cuántos colegios, hospitales y cupos de pensión serán necesarios a 10, 30 y 80 años. En este informe se describen el simulador de población construido para esa entidad y las ecuaciones diferenciales en las que se apoya. A partir de la tasa de crecimiento de 11 regiones (1700-2100), la población fue reconstruida con la solución de $P'=r(t)P$ por factor integrante, y los métodos de Euler y Runge-Kutta 4 fueron comparados con esa solución exacta. Se ajustó el modelo hiperbólico de von Foerster, con el que se predice una población infinita en 2022,6, y se identificó el dato que lo refuta. La tasa de cada región fue integrada hasta 2100 y comparada con tres escenarios de la ONU. Con un modelo por edades de segundo orden se explica por qué la población mundial pasaría de 7.795 a 9.123 millones aunque desde 2020 cada pareja tuviera solo los hijos de reemplazo. Se recomienda usar RK4 o la integral exacta con paso de un año, con tres pruebas automáticas, y presentar los escenarios como una banda con su fuente en lugar de un número único.
+\par\vspace{4pt}
+\noindent\textbf{\textit{Index Terms}}\,---ecuaciones diferenciales, dinámica de poblaciones, Runge-Kutta, factor integrante, ecuación de Bernoulli, inercia demográfica, incertidumbre, pruebas de software.\par}
+\vspace{12pt}
+}]
+
+\section{Introducción}
+En 1960 fue publicado en \textit{Science} un artículo de von Foerster, Mora y Amiot en el que se anunciaba que la población mundial se volvería infinita el viernes 13 de noviembre de 2026 \cite{foerster}. El modelo usado, $P'=kP^2$, se ajustaba muy bien a casi dos mil años de datos. La predicción falló, y de ese caso se desprende una advertencia para el software de planeación: un buen ajuste del pasado no garantiza una predicción correcta del futuro.
+
+Con esa advertencia como punto de partida se construyó un simulador en el que se resuelven cuatro ecuaciones de primer orden y una de segundo orden con datos reales. Cada método numérico se compara con una solución exacta, y el cálculo se detiene si se detecta una explosión. El informe sigue la ruta propuesta en la guía del proyecto: datos, tasa, ecuación, solución, escenarios, modelo por edades y recomendación.
+
+\section{Situación: la entidad, el simulador y la decisión}
+La entidad, que es ficticia, se encarga de planear servicios para la población. En la actualidad se usa en ella una hoja de cálculo con una sola tasa constante, es decir, un modelo exponencial. Se requiere un programa alimentado con datos reales, en el que se comparen escenarios y no se prometa más de lo que los datos permiten. La decisión que debe ser apoyada por el simulador es cuánta capacidad instalar a 10, 30 y 80 años. La pregunta técnica es qué modelos, métodos y pruebas deben incluirse en el programa, y cómo debe ser mostrada la incertidumbre.
+
+\section{Fuente y descripción de los datos}
+En el archivo de trabajo se reúnen dos fuentes. En la hoja \textit{Tasa\_crecimiento} se registra la tasa anual de crecimiento de 11 regiones entre 1700 y 2100, publicada por Our World in Data (OWID) \cite{owid}. En OWID se combinan tres fuentes según el periodo: HYDE 3.3 antes de 1800, Gapminder v7 entre 1800 y 1949, y la revisión 2024 de las Perspectivas de Población de la ONU (WPP 2024) desde 1950, con la variante media como proyección después de 2023 \cite{owid}. En la hoja \textit{Escenarios\_2020\_2100} se registra la población de 12 regiones en tres escenarios de la ONU: fecundidad constante, reemplazo inmediato y fecundidad baja \cite{wpp}. La población mundial de 2020 en esa hoja (7.794,8 millones) coincide con la revisión 2019, de modo que las dos hojas fueron tomadas de revisiones distintas. Los datos no provienen de un instrumento único: desde 1950 la ONU los estima a partir de censos, encuestas de hogares y registros vitales de cada país, mientras que los valores anteriores son reconstrucciones históricas con menor respaldo documental.
+
+En la auditoría (hoja 02 del Excel) no se encontraron vacíos ni duplicados, pero se detectaron cuatro problemas. Los 163 años de cada región no están igualmente espaciados: se dispone de 1700, 1800 y 1900, luego de un dato cada 5 años hasta 1950 y de un dato anual desde 1950. Ese espaciamiento se debe a que en OWID solo se publican esos años antes de 1950, para reducir el ruido de los datos escasos \cite{owid}. Las unidades también difieren, ya que la tasa se expresa en porcentaje anual y los escenarios en miles de personas; en el simulador se trabaja en fracción por año y en millones.
+
+Además, se encontraron nombres distintos para la misma región. South Korea y Republic of Korea corresponden al mismo país. South America no equivale a Latin America and the Caribbean, que incluye México, Centroamérica y el Caribe, por lo que esa comparación se declara aproximada. Para Northern America no se registra tasa.
+
+Por último, se observó una caída de la tasa mundial de 1,73\,\% en 1959 a 1,58\,\% en 1960, seguida de una subida a 2,11\,\% en 1962. En la misma fila, la tasa de China baja a $-0{,}03\,\%$, efecto de la Gran Hambruna china de 1959-1961 \cite{smil}. El dato fue conservado porque corresponde a un hecho histórico.
+
+En la Fig.~\ref{fig:tasa} se muestra la tasa mundial. Su valor es de 0,14\,\% en 1700 y de 0,74\,\% en 1900; el máximo, de 2,28\,\%, se alcanza en 1963. En 2024 la tasa baja a 0,86\,\%, y el primer valor negativo se registra en 2084.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{f01_tasa_mundial.png}
+\caption{Tasa de crecimiento mundial. Antes de 1950 solo se dispone de datos cada 100 o 5 años.}
+\label{fig:tasa}
+\end{figure}
+
+\section{Arquitectura del simulador}
+El código fue escrito en Python y organizado en cinco capas. En la capa de datos, la función \texttt{cargar\_datos} lee las hojas originales, rechaza vacíos y duplicados, asigna una clave común a cada región y convierte las unidades. En la capa de interpolación, con la clase \texttt{TasaInterpolada} se construye una $r(t)$ lineal por tramos y se rechaza cualquier extrapolación fuera de 1700-2100.
+
+En la capa de modelos se incluyen soluciones exactas para el modelo exponencial, el hiperbólico, la logística con tasa variable (resuelta por dos métodos) y el modelo por edades con reemplazo. En la capa de métodos se implementaron Euler y RK4 de paso fijo, junto con una variante de RK4 sin interpolación. Ambos métodos pasan por una guarda con la que se lanza \texttt{ExplosionDetectada} si $P$ supera un umbral o deja de ser finita, y \texttt{PoblacionNegativa} si $P<0$. En la capa de pruebas se reúnen dieciséis pruebas automáticas (\texttt{pruebas.py}) y un guion con el que se recalcula todo y se regeneran las figuras. El usuario accede al simulador por dos vías: una línea de comandos (\texttt{simular.py}), que entrega la tabla y la gráfica de una región con la banda de escenarios, y un cuaderno interactivo para Google Colab, con controles para la región, el método, el paso y los parámetros del modelo por edades. El código está disponible en \url{https://github.com/apabon42008-hub/Simulador-Poblacional}.
+
+Con los mismos datos se obtienen siempre los mismos resultados. Los cálculos principales también fueron repetidos en el Excel con fórmulas visibles, lo que sirve como verificación cruzada.
+
+\section{Modelos de primer orden y su solución}
+En el simulador se trabaja con cuatro ecuaciones de primer orden \cite{zill,boyce}:
+\begin{gather}
+P'=rP,\qquad P'=r(t)P,\label{eq:m1}\\
+P'=r(t)P\left(1-\tfrac{P}{K}\right),\qquad P'=kP^2.\label{eq:m2}
+\end{gather}
+Las dos primeras son lineales; la logística y la hiperbólica son no lineales, de tipo Bernoulli con $n=2$. La exponencial y la hiperbólica son autónomas, mientras que las otras dos no lo son, porque $r$ depende de $t$. Para la exponencial se necesitan una tasa y $P(t_0)$; para la de tasa variable, la serie $r(t)$; para la logística, además, una capacidad $K$; y para la hiperbólica, la constante $k$ ajustada con datos.
+
+\subsection{Exponencial (variables separables)}
+Al separar variables, de $dP/P=r\,dt$ se obtiene $P=P_0e^{r(t-t_0)}$. El tiempo de duplicación es $t_d=\ln 2/r$. Con la tasa máxima de 1963, $r=0{,}02283$, se obtiene $t_d=30{,}4$ años.
+
+\subsection{Hiperbólico (variables separables)}
+De $dP/P^2=k\,dt$ se obtiene $-1/P=kt-C$, es decir,
+\begin{equation}
+P(t)=\frac{1}{k\,(T-t)},\qquad T=t_0+\frac{1}{kP_0}.\label{eq:hip}
+\end{equation}
+Con este modelo la población llega a infinito en un tiempo finito, $t=T$.
+
+\subsection{Tasa variable (lineal, factor integrante)}
+La ecuación $P'-r(t)P=0$ es lineal con coeficiente variable. Con el factor integrante $\mu=e^{-\int r\,dt}$ se obtiene $(\mu P)'=0$, y de ahí
+\begin{equation}
+P(t)=P(t_0)\exp\!\left(\int_{t_0}^{t} r(s)\,ds\right).\label{eq:rec}
+\end{equation}
+La integral se calcula con la regla del trapecio sobre una malla anual, con la tasa interpolada linealmente. Como $r$ es lineal entre años enteros, el trapecio anual es exacto. Desde 7.794,8\M\ en 2020 se obtuvieron 1.582\M\ en 1900, 2.464\M\ en 1950, 6.099\M\ en 2000, 9.552\M\ en 2050, un máximo de 10.169\M\ en 2084 y 10.061\M\ en 2100 (Fig.~\ref{fig:rec}). Para 1950, Gapminder estima 2.499\M\ \cite{guia}, de modo que la diferencia es de $-1{,}4\,\%$.
+
+El error aumenta hacia el pasado por dos razones. Antes de 1950 la tasa solo se conoce cada 5 o 100 años, y con la interpolación lineal se pierden guerras, hambrunas y epidemias. Además, en el exponente de (\ref{eq:rec}) se acumula cualquier error de $r$ durante más años.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{f04_reconstruccion.png}
+\caption{Población mundial reconstruida con (\ref{eq:rec}) desde 2020 hacia atrás y hacia adelante.}
+\label{fig:rec}
+\end{figure}
+
+\subsection{Comparación de los modelos con los datos}
+Los tres modelos cerrados se ajustaron por mínimos cuadrados a la población reconstruida de 1900-1963 y se evaluaron fuera de esa ventana, en 1964-2023 (Tabla~\ref{tab:comp} y Fig.~\ref{fig:comp}). El modelo hiperbólico es el que mejor se ajusta dentro de la ventana, pero el que peor predice fuera de ella: su error se multiplica por 168. La logística ajustada en 1900-1963 degenera en la exponencial ($K\to\infty$), porque esos datos todavía no muestran saturación. En cambio, $P'=r(t)P$ no se ajusta, sino que reconstruye la población desde la tasa observada, y por eso es la base del simulador.
+
+\begin{table}[h]
+\centering\small
+\caption{Error cuadrático medio (millones): ajuste 1900-1963 y prueba 1964-2023}
+\label{tab:comp}
+\begin{tabular}{lrrr}
+\toprule
+Modelo & Ajuste & Prueba & $P(2023)$\\
+\midrule
+Exponencial & 76,2 & 1.572,3 & 5.598\\
+Logística (1900-1963) & 76,2 & 1.572,3 & 5.598\\
+Hiperbólico & 42,6 & 7.164,0 & 39.236\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{f13_comparacion_modelos.png}
+\caption{(a) Modelos ajustados en 1900-1963 (zona sombreada) y logística ajustada en 1950-2023. (b) Residuos dentro de la ventana de ajuste.}
+\label{fig:comp}
+\end{figure}
+
+\subsection{Métodos numéricos del simulador}
+Con Euler se avanza mediante $P_{n+1}=P_n+h\,r(t_n)P_n$. En RK4 se usan cuatro pendientes, dos de ellas evaluadas en $t_n+h/2$ \cite{burden}. En la Tabla~\ref{tab:num} se comparan ambos métodos con la integral exacta en 2100.
+
+\begin{table}[h]
+\centering\small
+\caption{Población 2100 (M) y error frente a 10.061,05\M}
+\label{tab:num}
+\begin{tabular}{lrrr}
+\toprule
+Método & $h$ (años) & $P(2100)$ & Error \\
+\midrule
+Euler & 1 & 10.104,7 & $+43{,}6$ \\
+Euler & 5 & 10.286,3 & $+225{,}2$ \\
+Euler & 10 & 10.500,9 & $+439{,}9$ \\
+RK4 & 1 & 10.061,05 & $<10^{-4}$ \\
+RK4 & 5 & 10.069,2 & $+8{,}2$ \\
+RK4 & 10 & 10.069,1 & $+8{,}1$ \\
+RK4 sin interpolar & 2 & 10.058,0 & $-3{,}1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Euler es de primer orden, y su error crece casi en proporción a $h$. Con RK4 y $h=1$ se reproduce la integral. Con $h=5$ y $h=10$, el error de RK4 deja de bajar (Fig.~\ref{fig:err}) porque queda dominado por el muestreo de la tasa: en cada paso la tasa solo se evalúa en tres instantes, y se pierden los quiebres anuales de los datos.
+
+Si la tasa solo se conociera en años enteros, el valor $r(t+h/2)$ que se requiere en RK4 con $h=1$ no estaría disponible. En ese caso puede interpolarse la tasa, como se hace en el simulador, o puede usarse $h=2$, para que el punto medio caiga en un año entero. Con la segunda opción se obtiene un error de $-0{,}03\,\%$.
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.85\columnwidth]{f05_error_metodos.png}
+\caption{Error en 2100 según el paso. El error de RK4 se estanca con $h\geq 5$.}
+\label{fig:err}
+\end{figure}
+
+\section{Métodos de solución: lineales, exactas, homogéneas y Bernoulli}
+
+\subsection{Ecuación exacta: la fecha del fin del mundo}
+El modelo hiperbólico se escribe en forma diferencial como
+\begin{equation}
+\underbrace{1}_{M}\,dt\;\underbrace{-\,\frac{1}{kP^2}}_{N}\,dP=0,\qquad \frac{\partial M}{\partial P}=0=\frac{\partial N}{\partial t},
+\end{equation}
+de modo que es exacta. La función potencial cumple $F_t=1$ y $F_P=-1/(kP^2)$:
+\begin{equation}
+F(t,P)=t+\frac{1}{kP}.
+\end{equation}
+A lo largo de cualquier solución, $F$ se mantiene constante, y ese valor coincide con $T$: cuando $P\to\infty$, se tiene $F\to t$. Así, $F$ corresponde a la fecha de la explosión.
+
+Para estimar $k$ se usa la relación $r=P'/P=kP$, que se deriva del modelo. Con una regresión de $r$ contra $P$ por el origen en la malla anual 1900-1963 (64 años) se obtuvo $k=\sum rP/\sum P^2=5{,}34\times10^{-6}$ por millón de personas y por año. Con el promedio de $F(t,P)$ en esos años se obtuvo $T=2022{,}6$ (Fig.~\ref{fig:hip}). Los valores individuales de $F$ van de 2018,5 a 2026,4, y si solo se usan los 24 años con dato propio, $T$ baja a 2012. La fecha estimada depende mucho de la ventana elegida.
+
+El modelo queda refutado por la tasa observada después de 1963. Según el modelo, $r$ debería crecer con $P$, pero después de ese año la población siguió subiendo mientras la tasa bajaba. Para 2020 se predice $r=kP=4{,}2\,\%$, y la tasa observada fue de 0,9\,\%.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=0.82\textwidth]{f06_hiperbolico.png}
+\caption{(a) Población reconstruida frente al modelo hiperbólico ajustado. (b) La relación $r=kP$ se cumple hasta 1963 y se rompe después.}
+\label{fig:hip}
+\end{figure*}
+
+\subsection{No exacta convertible en exacta}
+La logística con tasa variable se escribe como
+\begin{equation}
+\underbrace{\left[r(t)P-\tfrac{r(t)}{K}P^2\right]}_{M}dt\;\underbrace{-\,1}_{N}\,dP=0.
+\end{equation}
+Como $\partial M/\partial P=r(t)(1-2P/K)\neq 0=\partial N/\partial t$, la ecuación no es exacta. Sin embargo,
+\begin{equation}
+\frac{N_t-M_P}{M}=-\frac{K-2P}{P(K-P)}
+\end{equation}
+no depende de $t$, aunque $M$ sí dependa. Por tanto, existe un factor que depende solo de $P$: $\mu(P)=\exp\!\left(-\!\int\!\frac{K-2P}{P(K-P)}dP\right)=\frac{1}{P(K-P)}$. Al multiplicar por $\mu$ se obtiene $\frac{r(t)}{K}dt-\frac{dP}{P(K-P)}=0$, que es exacta y tiene como solución
+\begin{equation}
+\ln\frac{P}{K-P}=\int r(t)\,dt+C.
+\end{equation}
+El factor integrante funciona igual que con $r$ constante, porque $r(t)$ se cancela en el cociente.
+
+\subsection{Ecuación de Bernoulli}
+La misma logística puede escribirse como $P'-r(t)P=-\frac{r(t)}{K}P^2$, una Bernoulli con $n=2$. Con el cambio $w=P^{-1}$ se obtiene la ecuación lineal
+\begin{equation}
+w'+r(t)\,w=\frac{r(t)}{K},
+\end{equation}
+cuyo factor integrante es $e^{\int r}$. Su solución, $w=\frac1K+\left(\frac{1}{P_0}-\frac1K\right)e^{-\int r}$, coincide con la del apartado anterior. La capacidad se ajustó por mínimos cuadrados con la población de 1950-2023, y se obtuvo $K=12.509$\M\ con $r=0{,}0276$ por año. Con ese valor, con ambos métodos y con RK4 se obtuvieron 8.517,910\M\ en 2100, con diferencias menores que $10^{-11}$. El modelo hiperbólico también es una Bernoulli, con coeficiente lineal 0, coeficiente no lineal $k$ y $n=2$. Con $w=1/P$ se obtiene $w'=-k$, de donde vuelve a resultar (\ref{eq:hip}).
+
+\subsection{Ecuación homogénea: jóvenes y adultos}
+En el simulador la población se divide en jóvenes $Y$ (0-24 años), adultos $A$ (25-49) y mayores $O$ (50 o más):
+\begin{equation}
+Y'=\beta A-\gamma Y,\quad A'=\gamma Y-\gamma A,\quad O'=\gamma A-\delta O,
+\end{equation}
+con $\gamma=0{,}04$ por año (25 años por grupo). Al dividir las dos primeras ecuaciones se obtiene
+\begin{equation}
+\frac{dA}{dY}=\frac{\gamma Y-\gamma A}{\beta A-\gamma Y}=\frac{\gamma(1-v)}{\beta v-\gamma},\qquad v=\frac{A}{Y},
+\end{equation}
+que depende solo del cociente y, por tanto, es homogénea de grado cero. Con $A=vY$ queda $v+Yv'=\gamma(1-v)/(\beta v-\gamma)$. Con fecundidad de reemplazo ($\beta=\gamma$), el lado derecho vale $-1$, así que $dA/dY=-1$ y la suma $Y+A=S$ se conserva. Además, de $A'=\gamma(S-2A)$ se deduce que $A\to S/2$, de modo que $v\to 1$. Con la estructura supuesta para 2020, $v$ pasa de 0,854 a 1,000 (Fig.~\ref{fig:tray}).
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.78\columnwidth]{f08_trayectoria_edades.png}
+\caption{Trayectorias de $(Y,A)$ con $\beta=\gamma$: rectas de pendiente $-1$ que terminan en $A=Y$.}
+\label{fig:tray}
+\end{figure}
+
+\subsection{Campos de pendientes, equilibrios y pruebas}
+En la Fig.~\ref{fig:campos} se comparan los dos campos de pendientes. En la logística con $r$ constante se identifican dos equilibrios: $P=0$, inestable, y $P=K$, estable. En el modelo hiperbólico solo se identifica $P=0$, que es inestable. Como $P'=kP^2>0$ para todo $P\neq 0$, ninguna solución positiva se estabiliza, y todas explotan en $T=t_0+1/(kP_0)$.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=0.78\textwidth]{f07_campos_pendientes.png}
+\caption{Campos de pendientes. (a) Las soluciones de la logística tienden a $K$. (b) Las del modelo hiperbólico explotan en tiempo finito.}
+\label{fig:campos}
+\end{figure*}
+
+En el simulador se incluyeron tres pruebas automáticas:
+\begin{enumerate}
+\item Comparación con soluciones exactas. Con RK4 deben reproducirse la exponencial, la integral (\ref{eq:rec}), la logística exacta y la solución exacta del modelo por edades, con un error relativo menor que $10^{-6}$.
+\item Población no negativa. La reconstrucción de las 11 regiones debe ser positiva en todo $t$, y la guarda debe activarse cuando se usa un paso de Euler excesivo.
+\item Detección de explosiones. La integración de $P'=kP^2$ desde 1900, con el $k$ ajustado, debe ser detenida antes de 2022,6, y con datos reales no deben producirse falsas alarmas.
+\end{enumerate}
+Las dieciséis pruebas del archivo fueron aprobadas.
+
+\subsection{Aplicaciones de primer orden: sala de servidores y cinemática}
+Las mismas técnicas fueron aplicadas a la sala de 200~m³ donde se ejecuta el simulador. Para el volumen $x$ de CO$_2$ se planteó la ecuación lineal $x'=0{,}09+100\cdot400\times10^{-6}-\frac{100}{200}x$, cuya solución es $x(t)=x_{eq}+(x_0-x_{eq})e^{-t/2}$, con $x_{eq}=0{,}26$~m³. La concentración de equilibrio es de 1.300~ppm, y para no superar 1.000~ppm se requiere una ventilación de $Q=0{,}09/(600\times10^{-6})=150$~m³/h. Si falla el aire acondicionado, la temperatura cumple $T'=-0{,}5(T-30)+6$, con solución $T(t)=42-22e^{-0{,}5t}$; la sala tiende a 42~°C y alcanza 35~°C en $t=2\ln(22/7)=2{,}29$~h (Fig.~\ref{fig:serv}).
+
+Para el caso de cinemática usado en motores de videojuegos, $v'=-g-cv$ con $c=0{,}5$~s$^{-1}$, se tiene $v(t)=-g/c+(v_0+g/c)e^{-ct}$. Con una velocidad inicial supuesta de 20~m/s, la solución exacta da $-5{,}045$~m/s a los 2~s, y Euler con $h=1/60$~s da $-5{,}106$~m/s. El error de 1,2\,\% es difícil de percibir en pantalla, pero se acumula con el tiempo. En la Tabla~\ref{tab:apl} se relacionan estas y otras aplicaciones con las ecuaciones del proyecto.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{f10_servidores.png}
+\caption{(a) CO$_2$ en la sala con 100 y 150~m³/h de ventilación. (b) Temperatura si falla el aire acondicionado.}
+\label{fig:serv}
+\end{figure}
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{Una ecuación, muchos fenómenos}
+\label{tab:apl}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lll}
+\toprule
+Aplicación & Ecuación & Relación con el proyecto\\
+\midrule
+Población & $P'=r(t)P$ & ecuación central\\
+Epidemia & $I'=kI(N-I)$ & logística (Bernoulli)\\
+Newton & $T'=-k(T-T_a)+q$ & igual a $O'+\delta O=\gamma A$\\
+Mezclas & $x'=e-(Q/V)x$ & entradas y salidas\\
+Tanque & $h'=-k\sqrt h$ & separable, como el paso 5\\
+Cinemática & $v'=-g-cv$ & prueba de Euler\\
+Circuitos RC/RL & $LI'+RI=E$ & transitorio y equilibrio\\
+Masa-resorte & $mx''+bx'+kx=F$ & misma forma que (\ref{eq:a2})\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Verificación en GeoGebra}
+Los modelos se reprodujeron en GeoGebra Clásico con los comandos del archivo \texttt{geogebra/comandos\_geogebra.md}. Con \texttt{CampoDirecciones} y \texttt{ResuelveEDO} se dibujaron el campo de pendientes de $P'=kP^2$ y la solución que pasa por el dato de 1900, que se dispara al acercarse a $T$. Al mover el punto inicial sobre la curva, $T$ se mantiene constante, lo que confirma que $F(t,P)=t+1/(kP)$ es la función potencial. Con deslizadores para $\beta/\gamma$ y $m$ se observaron los tres regímenes del modelo por edades y la recta $A_p=\tfrac m2 t$ de la inmigración constante.
+% [Insertar aquí la captura de GeoGebra con su pie de figura]
+
+\section{Resultados: escenarios por región}
+Para cada región se aplicó (\ref{eq:rec}) entre 2020 y 2100, con la población de 2020 de los escenarios, y el resultado fue comparado con la ONU (Tabla~\ref{tab:esc} y Fig.~\ref{fig:reg}).
+
+\begin{table}[h]
+\centering\small
+\caption{Población 2100 (millones): tasa integrada frente a la ONU}
+\label{tab:esc}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrl}
+\toprule
+Región & Tasa & Const. & Reemp. & Baja & Cercano\\
+\midrule
+Mundo & 10.061 & 21.633 & 8.924 & 7.322 & Reemp.\\
+Colombia & 47,3 & 53,0 & 38,5 & 28,4 & Const.\\
+África & 3.741 & 12.677 & 3.325 & 3.031 & Reemp.\\
+Asia & 4.595 & 6.870 & 3.961 & 3.026 & Reemp.\\
+Europa & 592 & 596 & 553 & 428 & Const.\\
+Sudamérica$^{*}$ & 585 & 907 & 577 & 434 & Reemp.\\
+China & 639 & 999 & 906 & 684 & Baja\\
+India & 1.481 & 2.017 & 1.185 & 911 & Reemp.\\
+Japón & 77,0 & 66,0 & 66,1 & 50,5 & Reemp.\\
+Corea del Sur & 21,6 & 24,2 & 25,4 & 19,3 & Baja\\
+Nigeria & 459 & 2.265 & 515 & 531 & Reemp.\\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize $^{*}$Comparada con América Latina y el Caribe (aproximado).}
+\end{tabular}
+\end{table}
+
+Ningún escenario se ajusta a todas las regiones. Las regiones que ya tienen tasas negativas (China, Corea del Sur) se asemejan al escenario de fecundidad baja. Colombia y Europa se asemejan a la fecundidad constante, ya que en ambas la fecundidad actual está por debajo del reemplazo \cite{wpp} y mantenerla constante no dispara la población. El escenario constante casi triplica la población mundial porque en África y en parte de Asia se mantiene hoy una fecundidad alta: solo en África se pasaría de 1.341 a 12.677 millones.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{f09_escenarios_regiones.png}
+\caption{Población 2100 relativa a 2020 por región (escala logarítmica).}
+\label{fig:reg}
+\end{figure}
+
+\subsection{La paradoja del reemplazo inmediato}
+En el escenario de reemplazo, la población mundial sube de 7.795\M\ (2020) a 9.330\M\ (2050), alcanza 9.506\M\ en 2066 y luego baja. El crecimiento hasta 2050 equivale a una tasa constante de $\ln(9330/7795)/30=0{,}60\,\%$ anual.
+
+Esa curva no puede ser producida por ninguna ecuación autónoma $P'=f(P)$ con equilibrio en el valor de 2020. Si $f(P_{2020})=0$, la solución con ese dato inicial es constante, por unicidad. Además, las soluciones de una ecuación autónoma de primer orden son monótonas: si la población alcanzara un máximo en $P^{*}$, se tendría $f(P^{*})=0$, y $P^{*}$ sería un equilibrio que la solución no habría podido alcanzar. Para representar una subida seguida de una bajada se necesita más información que el tamaño total, en particular la estructura de edades.
+
+\section{El modelo por edades: segundo orden e inercia}
+\subsection{Teoría preliminar}
+De $A'=\gamma Y-\gamma A$ se despeja $Y=(A'+\gamma A)/\gamma$. Al derivar y sustituir $Y'=\beta A-\gamma Y+m$ se obtiene
+\begin{equation}
+A''+2\gamma A'+\gamma(\gamma-\beta)A=\gamma\,m,\label{eq:a2}
+\end{equation}
+donde $m$ representa la inmigración de jóvenes. Las condiciones iniciales se obtienen de la estructura de 2020: $A(0)=A_0$ y $A'(0)=\gamma(Y_0-A_0)$. Con 41\,\%, 35\,\% y 24\,\% de 7.794,8\M, se tiene $A_0=2.728{,}2$ y $A'(0)=18{,}7$\M\ por año. Como (\ref{eq:a2}) es lineal con coeficientes constantes y $m$ es continua, por el teorema de existencia y unicidad se garantiza una única solución en todo $t$. Con $\beta=\gamma$, las soluciones $y_1=1$ y $y_2=e^{-2\gamma t}$ de la homogénea tienen wronskiano $W=-2\gamma e^{-2\gamma t}\neq0$, por lo que son linealmente independientes.
+
+\subsection{Homogénea con coeficientes constantes}
+La ecuación auxiliar $m^2+2\gamma m+\gamma(\gamma-\beta)=0$ tiene raíces $m=-\gamma\pm\sqrt{\gamma\beta}$ y discriminante $4\gamma^2-4\gamma(\gamma-\beta)=4\beta\gamma>0$, de modo que en este modelo nunca se obtienen raíces complejas. Se calcularon tres casos:
+\begin{itemize}
+\item $\beta=\gamma$ (reemplazo): $m_1=0$ y $m_2=-0{,}08$, con $A=c_1+c_2e^{-0{,}08t}$.
+\item $\beta=1{,}1\gamma$: $m_1=0{,}00195$ y $m_2=-0{,}0820$, con lo que la población crece.
+\item $\beta=0{,}9\gamma$: $m_1=-0{,}00205$ y $m_2=-0{,}0779$, con lo que la población decrece.
+\end{itemize}
+La solución general toma tres formas según las raíces: $c_1e^{m_1t}+c_2e^{m_2t}$ para raíces reales distintas, $(c_1+c_2t)e^{mt}$ para una raíz doble y $e^{at}(c_1\cos bt+c_2\sin bt)$ para raíces complejas. En este modelo solo se presenta la primera. Los «ecos» de un auge de nacimientos, que reaparecen una generación después, solo pueden ser representados con más grupos de edad o con retardos, como en la matriz de Leslie o en la ecuación de renovación de Lotka.
+
+\subsection{Operador diferencial y no homogénea}
+Con $\beta=\gamma$, (\ref{eq:a2}) se escribe como $D(D+2\gamma)A=\gamma m$. El anulador de una inmigración constante es $D$, y el de $m=m_0+m_1\sin(\Omega t)$ es $D(D^2+\Omega^2)$. Al aplicar el anulador se obtiene $D^2(D+2\gamma)(D^2+\Omega^2)A=0$, donde la raíz 0 aparece dos veces, una por el operador y otra por el anulador. Por esa razón, la solución particular para $m$ constante lleva el factor $t$. Con $A_p=Ct$ se obtiene $2\gamma C=\gamma m$, y entonces
+\begin{equation}
+A_p=\frac{m}{2}\,t.
+\end{equation}
+Con fecundidad de reemplazo y una inmigración constante, los adultos crecen sin límite y en línea recta. Con $m=0{,}1$\M\ por año, el término particular suma 2,5\M\ de adultos en 50 años. Si se parte de condiciones nulas, el aumento es de 1,89\M, porque la parte homogénea tarda en ajustarse.
+
+\subsection{Principio de superposición}
+Como el operador es lineal, la respuesta a una suma de entradas es la suma de las respuestas. La solución total fue separada en tres partes: el transitorio heredado de la estructura inicial, $(A_0-S/2)e^{-2\gamma t}$; la respuesta a $m_0=0{,}1$; y la respuesta a $0{,}05\sin(2\pi t/10)$. En la Tabla~\ref{tab:sup} se muestra su tamaño.
+
+\begin{table}[h]
+\centering\small
+\caption{Partes de $A(t)$ en millones de adultos}
+\label{tab:sup}
+\begin{tabular}{rrrr}
+\toprule
+$t$ (años) & Transitorio & Constante & Oscilante\\
+\midrule
+10 & $-105{,}1$ & 0,16 & 0,022\\
+50 & $-4{,}3$ & 1,89 & 0,038\\
+100 & $-0{,}08$ & 4,38 & 0,039\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A los 10 y 50 años predomina el transitorio, y a los 100, la inmigración constante. El cruce se produce hacia los 58 años. La parte oscilante es pequeña porque su amplitud, $\gamma m_1/\big(\Omega\sqrt{\Omega^2+4\gamma^2}\big)\approx0{,}005$\M, queda amortiguada por la lentitud del sistema frente al ciclo de 10 años.
+
+\subsection{Aplicación: la inercia demográfica}
+Con reemplazo, sin inmigración y con $\delta=1/27$ por año, se tiene $A(t)=S/2+(A_0-S/2)e^{-2\gamma t}$, con $S=5.924$\M. La ecuación de los mayores, $O'+\delta O=\gamma A(t)$, es lineal, y con el factor $e^{\delta t}$ se obtiene
+\begin{equation}
+O=\frac{\gamma S}{2\delta}+\frac{\gamma(A_0-\tfrac S2)}{\delta-2\gamma}e^{-2\gamma t}+Ce^{-\delta t}.
+\end{equation}
+La población total tiende a $S+\gamma S/(2\delta)=9.123$\M. Con el modelo se obtuvieron 8.634\M\ en 2050 y 9.044\M\ en 2100, frente a 9.330 y 8.924\M\ de la ONU (Fig.~\ref{fig:inercia}). La solución exacta fue reproducida con RK4 con un error menor que $10^{-4}$\M.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{f12_inercia.png}
+\caption{Inercia demográfica con reemplazo inmediato: modelo por edades frente a la ONU.}
+\label{fig:inercia}
+\end{figure}
+
+Los 1.330 millones adicionales, que aparecen aunque cada pareja se reemplace exactamente, se explican por la estructura de edades, en el fenómeno que Keyfitz denominó \textit{momentum} \cite{keyfitz}. En 2020 se registran más jóvenes que adultos, y esos jóvenes todavía tendrán hijos. Además, después de los 50 se viven en promedio 27 años, de modo que la población de mayores pasa de 1.871 a 3.199\M. La población crece sin que aumente el número de hijos por pareja, porque cambia su distribución por edades. El pico de la ONU es subestimado por el modelo, ya que solo se usan tres grupos y no se incluye la caída de la mortalidad.
+
+\section{Discusión}
+\subsection{Ajuste y predicción}
+En 1900-1963, el modelo hiperbólico tenía un $R^2$ de 0,63 y un mecanismo plausible, según el cual más población producía más innovación y, con ella, más crecimiento. Aun así, con él se predijo una población infinita. Con un modelo empírico se describe un periodo, mientras que con una ley causal se explica el porqué del fenómeno. En el simulador, todo ajuste debe ser tratado como válido solo dentro de su ventana.
+
+\subsection{Preguntas de pensamiento crítico}
+\begin{enumerate}
+\item Sobre la responsabilidad de quien programa: en el código se decide qué se muestra primero, qué se omite y qué se redondea, y esas decisiones influyen en cuántos colegios u hospitales se construyen. Por ello, el equipo es responsable de documentar los supuestos y los límites, además de garantizar que el código funcione.
+\item Sobre otros modelos en la misma situación: el mismo riesgo se presenta en cualquier extrapolación de una tendencia reciente, como el crecimiento exponencial de usuarios de una plataforma, la «ley» de Moore prolongada sin límite o las proyecciones de casos al inicio de una epidemia. En todos esos casos se ajusta bien un tramo y la predicción falla cuando cambia el mecanismo.
+\item Sobre los supuestos acerca de la decisión de tener hijos: la planeación con escenarios es legítima si estos se presentan como hipótesis y no como metas. El riesgo aparece cuando un escenario se convierte en política, por ejemplo, si se deja de construir colegios porque se supone que la fecundidad bajará antes de que efectivamente baje.
+\item Sobre la incertidumbre ante quien solo quiere un número: en el simulador deben entregarse el rango, el escenario de referencia y la fuente, junto con una explicación de lo que cambia entre escenarios. Si se necesita un número para presupuestar, se entrega el del escenario elegido por la entidad, con el rango al lado.
+\item Sobre los datos de 1700 frente a los de 2023: no deben ser tratados igual. En el simulador cada dato se marca con su calidad (histórico, estimación o proyección), se dibuja con otro estilo y se advierte cuando un resultado depende de datos anteriores a 1950.
+\item Sobre las personas migrantes mal modeladas: si la migración se reduce a una constante, las regiones que reciben o expulsan población quedan mal planeadas, y las personas migrantes quedan por fuera de los servicios. Se requieren flujos por edad y por origen.
+\item Sobre la publicación del código: el código de un simulador usado por el Estado para decidir sobre servicios públicos debería poder ser auditado por la ciudadanía y por otros técnicos. Los datos de la ONU ya son públicos.
+\item Sobre las pruebas antes de la entrega: además de las tres del paso 12, deberían exigirse una prueba de reproducibilidad (mismos datos, mismos resultados), una prueba de regresión con los valores de control de la guía y la revisión independiente de un demógrafo.
+\end{enumerate}
+
+\section{Recomendación}
+El simulador puede ser usado por la entidad para planear, con las siguientes condiciones:
+\begin{itemize}
+\item A 10 años, se usa $P'=r(t)P$ con la tasa más reciente, resuelta con el trapecio exacto o con RK4 ($h=1$ año), y se muestran también los tres escenarios.
+\item A 30 años, se muestran los tres escenarios de la ONU, con su fuente y su revisión, junto con el modelo por edades, con el que se explica la inercia: con reemplazo se agregan más de 1.000 millones de personas.
+\item A 80 años, los resultados se presentan solo como rango. En 2100 el mundo va de 7.322 a 21.633 millones, y Colombia, de 28 a 53 millones.
+\end{itemize}
+Como método numérico se recomienda RK4 con $h=1$ año, con las tres pruebas automáticas siempre activas. En la pantalla principal debe ser mostrada una banda en lugar de una curva. Por último, en el simulador debe ser rechazada toda extrapolación fuera de los datos, y debe emitirse una advertencia cuando un modelo ajustado se acerque a una singularidad.
+
+\section{Limitaciones, riesgos y dimensión ética}
+La tasa (WPP 2024) y los escenarios (WPP 2019) fueron tomados de revisiones distintas de la ONU. La estructura de edades de 2020 fue supuesta, al igual que $\gamma$, $\delta$ y la inmigración. La migración fue modelada como una entrada de jóvenes, cuando en la realidad depende de la edad, la economía y la política. Sudamérica se comparó con una región más grande. Con el modelo de tres grupos no se producen ecos generacionales. Para un uso real se requerirían la pirámide de edades por país, la fecundidad y la mortalidad por edad y los flujos migratorios.
+
+La dimensión ética del simulador se relaciona con su uso. Con una cifra presentada sin rango podría justificarse que no se construya un hospital. Los errores del modelo tampoco se distribuyen por igual: las regiones con datos más escasos y las poblaciones migrantes quedan peor representadas, y son precisamente las que más dependen de servicios públicos bien planeados. Por esa razón, en el simulador debe documentarse cada supuesto, y la incertidumbre debe quedar a la vista del usuario.
+
+\section{Conclusiones}
+La evolución de una población depende tanto de su tasa como de su estructura de edades. Con una ecuación de primer orden se reconstruye bien el pasado reciente, pero la paradoja del reemplazo solo puede ser explicada con el modelo de segundo orden. Para el simulador son suficientes RK4 con paso anual o la integral exacta, y con las pruebas automáticas se detectan errores que pasan inadvertidos tras un buen ajuste. El caso de 1960 muestra que el modelo de von Foerster falló por la interpretación, ya que un ajuste fue leído como si fuera una ley. En un simulador para planear, la incertidumbre debe ser mostrada al usuario.
+
+\begin{thebibliography}{10}\small
+\bibitem{owid} Our World in Data, «Population growth rate», con base en HYDE (2023), Gapminder (2022) y UN WPP (2024). [En línea]. Disponible: https://ourworldindata.org/grapher/population-growth-rate. [Consultado: 6 de nov. de 2026]
+\bibitem{wpp} United Nations, Department of Economic and Social Affairs, Population Division, \textit{World Population Prospects 2019} y \textit{2024}. New York: United Nations. [En línea]. Disponible: https://population.un.org/wpp/. [Consultado: 6 de nov. de 2026]
+\bibitem{foerster} H. von Foerster, P. M. Mora y L. W. Amiot, «Doomsday: Friday, 13 November, A.D. 2026», \textit{Science}, vol. 132, no. 3436, pp. 1291-1295, 1960.
+\bibitem{keyfitz} N. Keyfitz, «On the momentum of population growth», \textit{Demography}, vol. 8, no. 1, pp. 71-80, 1971.
+\bibitem{burden} R. L. Burden y J. D. Faires, \textit{Análisis numérico}, 9.ª ed. México: Cengage Learning, 2011.
+\bibitem{zill} D. G. Zill, \textit{Ecuaciones diferenciales con aplicaciones de modelado}, 10.ª ed. México: Cengage Learning, 2015.
+\bibitem{boyce} W. E. Boyce, R. C. DiPrima y D. B. Meade, \textit{Elementary Differential Equations and Boundary Value Problems}, 11.ª ed. Hoboken, NJ: Wiley, 2017.
+\bibitem{kilpatrick} W. H. Kilpatrick, «The Project Method», \textit{Teachers College Record}, vol. 19, no. 4, pp. 319-335, 1918.
+\bibitem{dewey} J. Dewey, \textit{How We Think}. Boston: D. C. Heath, 1910.
+\bibitem{skovsmose} O. Skovsmose, «Escenarios de investigación», \textit{Revista EMA}, vol. 6, no. 1, pp. 3-26, 2000.
+\bibitem{smil} V. Smil, «China's great famine: 40 years later», \textit{BMJ}, vol. 319, no. 7225, pp. 1619-1621, 1999.
+\bibitem{guia} Universidad de Santander, \textit{Proyecto de Aula PA5: Simulador de escenarios de población}, guía del curso Ecuaciones Diferenciales, 2026B.
+\end{thebibliography}
+\end{document}

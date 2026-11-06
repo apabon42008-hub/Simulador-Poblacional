@@ -1,0 +1,164 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{fontspec}
+\setsansfont{TeX Gyre Heros}
+\usepackage{polyglossia}
+\setdefaultlanguage{spanish}
+\usepackage{amsmath}
+\usepackage{icomma}
+\usepackage{booktabs}
+\usetheme{default}
+\definecolor{azul}{HTML}{1F3B57}
+\definecolor{acento}{HTML}{1F3B57}
+\definecolor{rojo}{HTML}{9B2C2C}
+\definecolor{gris}{HTML}{666666}
+\setbeamercolor{normal text}{fg=black!85}
+\setbeamercolor{structure}{fg=azul}
+\setbeamercolor{frametitle}{fg=azul}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\graphicspath{{diap/}}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{gris}\textbullet}
+\setbeamertemplate{itemize subitem}{\color{gris}\textendash}
+\setbeamertemplate{enumerate item}{\insertenumlabel.}
+\setbeamertemplate{frametitle}{\vspace{0.35cm}\insertframetitle\par\vspace{-0.1cm}{\color{gris!50}\rule{\textwidth}{0.4pt}}\vspace{0.05cm}}
+\setbeamertemplate{footline}{\hspace{0.6cm}{\tiny\color{gris}Universidad de Santander · Ecuaciones Diferenciales 2026B}\hfill{\tiny\color{gris}\insertframenumber}\hspace{0.6cm}\vspace{0.3cm}}
+\setbeamersize{text margin left=0.6cm,text margin right=0.6cm}
+\newcommand{\dato}[2]{\begin{minipage}[t]{0.31\textwidth}\centering{\Large\bfseries\color{azul}#1}\\[2pt]{\small\color{gris}#2}\end{minipage}}
+
+\newcommand{\nota}[1]{\par\vspace{2pt}{\small\color{gris}#1}}
+\newcommand{\fuente}[1]{\vfill{\tiny\color{gris}Fuente: #1}}
+\newcommand{\cifra}[2]{\begin{minipage}[t]{0.3\textwidth}\centering{\fontsize{30}{32}\selectfont\bfseries\color{azul}#1}\\[4pt]{\small\color{gris}#2}\end{minipage}}
+\begin{document}
+
+{\setbeamertemplate{footline}{}
+\begin{frame}
+\vspace{0.6cm}
+{\small\color{gris}Universidad de Santander · Departamento de Matemáticas y Física\\Proyecto de Aula · Ecuaciones Diferenciales 2026B}\\[1.4cm]
+{\LARGE\bfseries\color{azul}Simulador de escenarios de población}\\[6pt]
+{\large Tasa variable, crecimiento hiperbólico e inercia demográfica}\\[1.2cm]
+{\small Juan Camilo Castaño Rojas · Leder Andrés Cortes Cortes · Giovanny Esteban Arias Córdoba\\Andrés Felipe Pabón Barbosa · Camilo José Luna · Andrés}\\[6pt]
+{\small\color{gris}Ingeniería de Software · Grupo 2 · Docente: Prof. Botello · noviembre de 2026}
+\end{frame}
+}
+
+\begin{frame}{La entidad necesita planear servicios a 10, 30 y 80 años}
+\vspace{0.8cm}
+\begin{center}
+\cifra{10}{años: colegios}\hfill\cifra{30}{años: hospitales}\hfill\cifra{80}{años: pensiones}
+\end{center}
+\vspace{1.2cm}
+\begin{center}
+{\large Hoy se planea con una sola tasa constante, $P'=rP$.}\\[8pt]
+{\color{gris}En 1960, con una ecuación diferencial, se predijo población infinita para el} {\color{rojo}\textbf{13 de noviembre de 2026}}.
+\end{center}
+\end{frame}
+
+\begin{frame}{La tasa mundial llegó a su máximo en 1963 y será negativa desde 2084}
+\centering
+\includegraphics[width=0.86\textwidth]{diap/f01_tasa_mundial.png}
+\nota{Datos cada 100, 5 y 1 año · tasa en \% y población en miles · nombres distintos entre fuentes}
+\fuente{OWID (HYDE, Gapminder, ONU WPP 2024) y ONU WPP 2019.}
+\end{frame}
+
+\begin{frame}{El simulador resuelve cuatro ecuaciones de primer orden}
+\vspace{0.7cm}
+\begin{columns}[T]
+\column{0.48\textwidth}\centering
+{\small\color{gris}Exponencial}\\[4pt]{\Large $P'=rP$}\\[1.1cm]
+{\small\color{gris}Logística con tasa variable}\\[4pt]{\Large $P'=r(t)P\left(1-\dfrac{P}{K}\right)$}
+\column{0.48\textwidth}\centering
+{\small\color{gris}Tasa variable (datos)}\\[4pt]{\Large $P'=r(t)P$}\\[1.1cm]
+{\small\color{gris}Hiperbólico (von Foerster, 1960)}\\[4pt]{\Large $P'=kP^2$}
+\end{columns}
+\vspace{1cm}
+\begin{center}{\small\color{gris}Lineales: las dos de arriba · Bernoulli ($n=2$): las dos de abajo}\end{center}
+\end{frame}
+
+\begin{frame}{El modelo de 1960 ajustaba bien, pero predecía una explosión en 2022,6}
+\centering
+\includegraphics[width=0.92\textwidth]{diap/f06_hiperbolico.png}
+\nota{$F(t,P)=t+\dfrac{1}{kP}=T$ \quad·\quad después de 1963 la población siguió creciendo y la tasa bajó}
+\fuente{von Foerster et al. (1960) y cálculo propio.}
+\end{frame}
+
+\begin{frame}{Desde la tasa observada se reconstruye la población}
+\centering
+\includegraphics[width=0.74\textwidth]{diap/f04_reconstruccion.png}
+\nota{$P(t)=P(2020)\,e^{\int_{2020}^{t} r(s)\,ds}$ \quad·\quad 2.464 M en 1950 (Gapminder: 2.499 M)}
+\fuente{Cálculo propio con la tasa de OWID / ONU WPP 2024.}
+\end{frame}
+
+\begin{frame}{RK4 con paso anual reproduce la solución exacta}
+\begin{columns}[c]
+\column{0.58\textwidth}
+\includegraphics[width=\textwidth]{diap/f05_error_metodos.png}
+\column{0.38\textwidth}\centering
+{\fontsize{34}{36}\selectfont\bfseries\color{azul}16/16}\\[2pt]
+{\small\color{gris}pruebas automáticas aprobadas}\\[0.8cm]
+{\small Solución exacta · población positiva\\explosión detectada · ajuste frente a predicción}
+\end{columns}
+\fuente{Cálculo propio. Error en 2100: Euler +43,6 M; RK4 menor que 0,0001 M.}
+\end{frame}
+
+\begin{frame}{Ningún escenario de la ONU sirve para todas las regiones}
+\centering
+\includegraphics[width=0.86\textwidth]{diap/f09_escenarios_regiones.png}
+\nota{Colombia en 2100: 47,3 M con la tasa · entre 28,4 y 53,0 M según el escenario}
+\fuente{ONU WPP 2019 (escenarios) y cálculo propio (tasa integrada).}
+\end{frame}
+
+\begin{frame}{Con fecundidad de reemplazo la población sigue creciendo}
+\vspace{1cm}
+\begin{center}
+\cifra{7.795}{millones en 2020}\hfill\cifra{9.330}{millones en 2050}\hfill\cifra{9.506}{millones en 2066}
+\end{center}
+\vspace{1.2cm}
+\begin{center}
+{\large Ninguna ecuación autónoma $P'=f(P)$ de primer orden produce esta curva.}\\[6pt]
+{\color{gris}Hace falta seguir la estructura de edades.}
+\end{center}
+\fuente{ONU WPP 2019, escenario de reemplazo inmediato.}
+\end{frame}
+
+\begin{frame}{La estructura de edades agrega 1.330 millones de personas}
+\centering
+\includegraphics[width=0.78\textwidth]{diap/f12_inercia.png}
+\nota{$A''+2\gamma A'+\gamma(\gamma-\beta)A=\gamma m$ \quad·\quad raíces $0$ y $-0{,}08$ con $\beta=\gamma$ \quad·\quad límite de 9.123 M}
+\fuente{Modelo propio con los supuestos de la guía; ONU WPP 2019.}
+\end{frame}
+
+\begin{frame}{Recomendación: mostrar una banda, no un número}
+\vspace{0.6cm}
+\begin{columns}[T]
+\column{0.3\textwidth}\centering
+{\fontsize{26}{28}\selectfont\bfseries\color{azul}10}\\{\small\color{gris}años}\\[8pt]
+{\small Tasa integrada con RK4, paso de 1 año}
+\column{0.3\textwidth}\centering
+{\fontsize{26}{28}\selectfont\bfseries\color{azul}30}\\{\small\color{gris}años}\\[8pt]
+{\small Tres escenarios de la ONU y modelo por edades}
+\column{0.3\textwidth}\centering
+{\fontsize{26}{28}\selectfont\bfseries\color{azul}80}\\{\small\color{gris}años}\\[8pt]
+{\small Solo un rango: 7.322 a 21.633 M en 2100}
+\end{columns}
+\vspace{1cm}
+\begin{center}{\color{gris}Cada curva con su fuente · pruebas siempre activas · sin extrapolar fuera de los datos}\end{center}
+\end{frame}
+
+\begin{frame}{Limitaciones y referencias}
+\begin{columns}[T]
+\column{0.42\textwidth}\small
+Tasa y escenarios de revisiones distintas de la ONU.\\[6pt]
+Estructura de edades y migración supuestas.\\[6pt]
+Tres grupos de edad: sin ecos generacionales.\\[6pt]
+Un buen ajuste no es una ley causal.
+\column{0.55\textwidth}\scriptsize
+[1] Our World in Data, «Population growth rate», HYDE, Gapminder y UN WPP 2024.\\[2pt]
+[2] United Nations, \textit{World Population Prospects 2019} y \textit{2024}.\\[2pt]
+[3] H. von Foerster, P. M. Mora y L. W. Amiot, «Doomsday: Friday, 13 November, A.D. 2026», \textit{Science}, vol. 132, 1960.\\[2pt]
+[4] N. Keyfitz, «On the momentum of population growth», \textit{Demography}, vol. 8, 1971.\\[2pt]
+[5] R. L. Burden y J. D. Faires, \textit{Análisis numérico}, 9.ª ed., 2011.\\[2pt]
+[6] D. G. Zill, \textit{Ecuaciones diferenciales con aplicaciones de modelado}, 10.ª ed., 2015.
+\end{columns}
+\end{frame}
+
+\end{document}

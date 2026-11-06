@@ -1,0 +1,392 @@
+{
+  "paso1": {
+    "registros_tasa": 1793,
+    "regiones_tasa": 11,
+    "anios_por_region": 163,
+    "registros_escenarios": 972,
+    "regiones_escenarios": 12,
+    "tasa_1950": 1.738,
+    "tasa_1959": 1.729,
+    "tasa_1960": 1.584,
+    "tasa_1961": 1.6650000000000003,
+    "tasa_1962": 2.112,
+    "china_1960": -0.032
+  },
+  "paso3": {
+    "tasa_1700": 0.1429362,
+    "tasa_1900": 0.73847544,
+    "tasa_max": 2.283,
+    "anio_max": 1963,
+    "tasa_2024": 0.8579999999999999,
+    "primer_negativo": 2084,
+    "esc_2100": {
+      "constante": 21632.736823,
+      "reemplazo": 8924.236947000001,
+      "baja": 7322.116481
+    },
+    "esc_2020": 7794.798729
+  },
+  "paso5": {
+    "r_1963": 0.02283,
+    "t_duplicacion": 30.361243125709386
+  },
+  "paso6": {
+    "P2020": 7794.798729,
+    "P1700": 685.8623699019696,
+    "P1800": 897.4388915478769,
+    "P1900": 1581.584862224783,
+    "P1950": 2463.903008961578,
+    "P2000": 6099.468777006277,
+    "P2050": 9551.533157410076,
+    "P_max": 10169.028522472257,
+    "anio_max": 2084,
+    "P2100": 10061.051495755497,
+    "gapminder_1950": 2499.0,
+    "error_1950_pct": -1.4044414181041196
+  },
+  "paso7": {
+    "referencia_2100": 10061.051495755497,
+    "tabla": [
+      {
+        "metodo": "Euler",
+        "h": 1,
+        "P2100": 10104.683477030154,
+        "error_abs": 43.63198127465694,
+        "error_rel_pct": 0.43367217922564216
+      },
+      {
+        "metodo": "RK4",
+        "h": 1,
+        "P2100": 10061.051495689828,
+        "error_abs": -6.566915544681251e-08,
+        "error_rel_pct": -6.527066825422439e-10
+      },
+      {
+        "metodo": "Euler",
+        "h": 5,
+        "P2100": 10286.260782453004,
+        "error_abs": 225.2092866975072,
+        "error_rel_pct": 2.2384269357185707
+      },
+      {
+        "metodo": "RK4",
+        "h": 5,
+        "P2100": 10069.204175755205,
+        "error_abs": 8.152679999708198,
+        "error_rel_pct": 0.08103208698561584
+      },
+      {
+        "metodo": "Euler",
+        "h": 10,
+        "P2100": 10500.948011661501,
+        "error_abs": 439.8965159060044,
+        "error_rel_pct": 4.372271785822641
+      },
+      {
+        "metodo": "RK4",
+        "h": 10,
+        "P2100": 10069.118126813342,
+        "error_abs": 8.06663105784537,
+        "error_rel_pct": 0.08017681910532391
+      },
+      {
+        "metodo": "RK4 sin interpolar (h = 2)",
+        "h": 2,
+        "P2100": 10057.981625357932,
+        "error_abs": -3.069870397564955,
+        "error_rel_pct": -0.030512421081037657
+      }
+    ]
+  },
+  "paso8": {
+    "k": 5.336155160764321e-06,
+    "T": 2022.565712530251,
+    "T_min": 2018.4892774748596,
+    "T_max": 2026.4373479655887,
+    "T_ultimo": 2022.3919212387277,
+    "r2": 0.6259562387718263,
+    "n_datos": 64,
+    "k_solo_datos": 6.182774505101994e-06,
+    "T_solo_datos": 2012.0187245758705,
+    "P_hiperbolico_2000": 8304.672291600176,
+    "P_reconstruida_2000": 6099.468777006277,
+    "r_hiperbolico_2020": 0.04159425546487252,
+    "r_observada_2020": 0.00902
+  },
+  "comparacion_modelos": {
+    "Exponencial": {
+      "parametros": {
+        "P0": 1489.6368097313143,
+        "r": 0.010762654058863941
+      },
+      "rmse_ajuste": 76.23880922900199,
+      "rmse_prueba": 1572.2853380730007
+    },
+    "Logística": {
+      "parametros": {
+        "K": 28174263043.511765,
+        "P0": 1489.636734681946,
+        "r": 0.01076265598807932
+      },
+      "rmse_ajuste": 76.23881185924712,
+      "rmse_prueba": 1572.2851778402628
+    },
+    "Hiperbólico": {
+      "parametros": {
+        "k": 5.0478901808544326e-06,
+        "T": 2028.0489439000896
+      },
+      "rmse_ajuste": 42.5558866755144,
+      "rmse_prueba": 7163.9716625909405
+    }
+  },
+  "logistica_1950_2023": {
+    "parametros": {
+      "K": 12509.37437043152,
+      "P0": 706.9161612739686,
+      "r": 0.027628787590164763
+    },
+    "rmse_ajuste": 20.47537207488574,
+    "rmse_prueba": null
+  },
+  "paso9_11": {
+    "K_ajustada": 12509.37437043152,
+    "P2100_factor_integrante": 8517.909835707738,
+    "P2100_bernoulli": 8517.909835707738,
+    "P2100_rk4": 8517.909835445287,
+    "max_dif_metodos": 3.637978807091713e-12
+  },
+  "paso10": {
+    "v0": 0.8536585365853658,
+    "v_150": 0.9999990298614209,
+    "S0": 5924.04703404,
+    "S_150": 5924.04703404
+  },
+  "paso13": [
+    {
+      "clave": "MUN",
+      "region": "Mundo",
+      "comparada_con": "Mundo",
+      "P2020": 7794.798729,
+      "tasa_integrada_2100": 10061.051495755479,
+      "constante": 21632.736823,
+      "reemplazo": 8924.236947000001,
+      "baja": 7322.116481,
+      "escenario_cercano": "reemplazo",
+      "aproximada": false
+    },
+    {
+      "clave": "COL",
+      "region": "Colombia",
+      "comparada_con": "Colombia",
+      "P2020": 50.882884,
+      "tasa_integrada_2100": 47.318039133200315,
+      "constante": 53.005556,
+      "reemplazo": 38.508192,
+      "baja": 28.392269,
+      "escenario_cercano": "constante",
+      "aproximada": false
+    },
+    {
+      "clave": "AFR",
+      "region": "África",
+      "comparada_con": "África",
+      "P2020": 1340.5981129999998,
+      "tasa_integrada_2100": 3740.501861204854,
+      "constante": 12677.030784,
+      "reemplazo": 3324.932197,
+      "baja": 3031.0397310000003,
+      "escenario_cercano": "reemplazo",
+      "aproximada": false
+    },
+    {
+      "clave": "ASI",
+      "region": "Asia",
+      "comparada_con": "Asia",
+      "P2020": 4641.054786000001,
+      "tasa_integrada_2100": 4594.782776335815,
+      "constante": 6869.508127,
+      "reemplazo": 3961.262643,
+      "baja": 3025.76067,
+      "escenario_cercano": "reemplazo",
+      "aproximada": false
+    },
+    {
+      "clave": "EUR",
+      "region": "Europa",
+      "comparada_con": "Europa",
+      "P2020": 747.6360450000001,
+      "tasa_integrada_2100": 591.8751099357654,
+      "constante": 595.883885,
+      "reemplazo": 553.369461,
+      "baja": 427.50370000000004,
+      "escenario_cercano": "constante",
+      "aproximada": false
+    },
+    {
+      "clave": "SAM",
+      "region": "Sudamérica",
+      "comparada_con": "América Latina y el Caribe",
+      "P2020": 653.9623320000001,
+      "tasa_integrada_2100": 585.412587997631,
+      "constante": 906.8862979999999,
+      "reemplazo": 576.959973,
+      "baja": 434.3394,
+      "escenario_cercano": "reemplazo",
+      "aproximada": true
+    },
+    {
+      "clave": "CHN",
+      "region": "China",
+      "comparada_con": "China",
+      "P2020": 1439.323774,
+      "tasa_integrada_2100": 639.2168025080629,
+      "constante": 999.028416,
+      "reemplazo": 906.070359,
+      "baja": 684.0495259999999,
+      "escenario_cercano": "baja",
+      "aproximada": false
+    },
+    {
+      "clave": "IND",
+      "region": "India",
+      "comparada_con": "India",
+      "P2020": 1380.004385,
+      "tasa_integrada_2100": 1481.028348706391,
+      "constante": 2017.158617,
+      "reemplazo": 1184.893405,
+      "baja": 911.186501,
+      "escenario_cercano": "reemplazo",
+      "aproximada": false
+    },
+    {
+      "clave": "JPN",
+      "region": "Japón",
+      "comparada_con": "Japón",
+      "P2020": 126.476458,
+      "tasa_integrada_2100": 76.95271852196929,
+      "constante": 66.049028,
+      "reemplazo": 66.10459200000001,
+      "baja": 50.480088,
+      "escenario_cercano": "reemplazo",
+      "aproximada": false
+    },
+    {
+      "clave": "KOR",
+      "region": "Corea del Sur",
+      "comparada_con": "Corea del Sur",
+      "P2020": 51.269183,
+      "tasa_integrada_2100": 21.598413230134934,
+      "constante": 24.170039,
+      "reemplazo": 25.366486000000002,
+      "baja": 19.289213,
+      "escenario_cercano": "baja",
+      "aproximada": false
+    },
+    {
+      "clave": "NGA",
+      "region": "Nigeria",
+      "comparada_con": "Nigeria",
+      "P2020": 206.139587,
+      "tasa_integrada_2100": 459.27012570302855,
+      "constante": 2264.811654,
+      "reemplazo": 515.3641319999999,
+      "baja": 531.218463,
+      "escenario_cercano": "reemplazo",
+      "aproximada": false
+    }
+  ],
+  "paso14": {
+    "P2020": 7794.798729,
+    "P2050_reemplazo": 9330.049939999999,
+    "max_reemplazo": 9505.773713999999,
+    "anio_max_reemplazo": 2066,
+    "r_constante_equivalente": 0.005992789527348623,
+    "t_duplicacion_equivalente": 115.66352821114559
+  },
+  "paso15": {
+    "co2_equilibrio": 1300.0,
+    "tau_horas": 2.0,
+    "co2_1h": 754.1224062586299,
+    "Q_min": 150.0,
+    "T_final": 42.0,
+    "t_35": 2.2902646086060052
+  },
+  "paso16": {
+    "v0_supuesto": 20.0,
+    "v_exacta_2s": -5.0446165407874535,
+    "v_euler_2s": -5.1055590586720445,
+    "error": -0.06094251788459104,
+    "error_rel_pct": -1.2080703734733829
+  },
+  "pasos17_21": {
+    "raices": {
+      "reemplazo": {
+        "beta": 0.04,
+        "m1": 0.0,
+        "m2": -0.08,
+        "disc": 0.0064
+      },
+      "mas10": {
+        "beta": 0.044000000000000004,
+        "m1": 0.0019523539268060663,
+        "m2": -0.08195235392680607,
+        "disc": 0.007040000000000001
+      },
+      "menos10": {
+        "beta": 0.036000000000000004,
+        "m1": -0.00205266807797945,
+        "m2": -0.07794733192202055,
+        "disc": 0.00576
+      }
+    },
+    "wronskiano_t0": -0.08,
+    "Y0": 3195.86747889,
+    "A0": 2728.17955515,
+    "O0": 1870.75169496,
+    "dA0": 18.70751694959999,
+    "particular_50": 2.5,
+    "respuesta_constante_50_cond_nulas": 1.8864472743054588,
+    "superposicion": [
+      {
+        "t": 0,
+        "homogenea": 2728.17955515,
+        "transitorio": -233.84396186999993,
+        "constante": 0.0,
+        "oscilante": 0.0
+      },
+      {
+        "t": 10,
+        "homogenea": 2856.950651867886,
+        "transitorio": -105.07286515211399,
+        "constante": 0.15583060257326348,
+        "oscilante": 0.021560971047448765
+      },
+      {
+        "t": 50,
+        "homogenea": 2957.740515458078,
+        "transitorio": -4.283001561921992,
+        "constante": 1.8864472743054588,
+        "oscilante": 0.03843686467678839
+      },
+      {
+        "t": 100,
+        "homogenea": 2961.9450711100317,
+        "transitorio": -0.07844590996819534,
+        "constante": 4.375209664142439,
+        "oscilante": 0.0391408604102236
+      }
+    ],
+    "amplitud_oscilante": 0.0050254878799221294
+  },
+  "paso22": {
+    "P2050": 8633.867191577152,
+    "P2100": 9043.521710785877,
+    "P_final": 9123.0324324216,
+    "max_dif_rk4": 2.2219698621483985e-05,
+    "onu_2050": 9330.049939999999,
+    "onu_2100": 8924.236947000001,
+    "O_final": 3198.9853983816,
+    "S": 5924.04703404
+  }
+}
