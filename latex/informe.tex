@@ -53,7 +53,7 @@
 \section{Introducción}
 En 1960 fue publicado en \textit{Science} un artículo de von Foerster, Mora y Amiot en el que se anunciaba que la población mundial se volvería infinita el viernes 13 de noviembre de 2026 \cite{foerster}. El modelo usado, $P'=kP^2$, se ajustaba muy bien a casi dos mil años de datos. La predicción falló, y de ese caso se desprende una advertencia para el software de planeación: un buen ajuste del pasado no garantiza una predicción correcta del futuro.
 
-Con esa advertencia como punto de partida se construyó un simulador en el que se resuelven cuatro ecuaciones de primer orden y una de segundo orden con datos reales. Cada método numérico se compara con una solución exacta, y el cálculo se detiene si se detecta una explosión. El informe sigue la ruta propuesta en la guía del proyecto: datos, tasa, ecuación, solución, escenarios, modelo por edades y recomendación.
+Con esa advertencia como punto de partida se construyó un simulador en el que se resuelven cuatro ecuaciones de primer orden y una de segundo orden con datos reales. Cada método numérico se compara con una solución exacta, y el cálculo se detiene si se detecta una explosión. El informe sigue la ruta propuesta en la guía del proyecto \cite{guia}, organizada según el método de proyectos \cite{kilpatrick,dewey} y la educación matemática crítica \cite{skovsmose}: datos, tasa, ecuación, solución, escenarios, modelo por edades y recomendación.
 
 \section{Situación: la entidad, el simulador y la decisión}
 La entidad, que es ficticia, se encarga de planear servicios para la población. En la actualidad se usa en ella una hoja de cálculo con una sola tasa constante, es decir, un modelo exponencial. Se requiere un programa alimentado con datos reales, en el que se comparen escenarios y no se prometa más de lo que los datos permiten. La decisión que debe ser apoyada por el simulador es cuánta capacidad instalar a 10, 30 y 80 años. La pregunta técnica es qué modelos, métodos y pruebas deben incluirse en el programa, y cómo debe ser mostrada la incertidumbre.
@@ -284,8 +284,17 @@ Masa-resorte & $mx''+bx'+kx=F$ & misma forma que (\ref{eq:a2})\\
 
 
 \subsection{Verificación en GeoGebra}
-Los modelos se reprodujeron en GeoGebra Clásico con los comandos del archivo \texttt{geogebra/comandos\_geogebra.md}. Con \texttt{CampoDirecciones} y \texttt{ResuelveEDO} se dibujaron el campo de pendientes de $P'=kP^2$ y la solución que pasa por el dato de 1900, que se dispara al acercarse a $T$. Al mover el punto inicial sobre la curva, $T$ se mantiene constante, lo que confirma que $F(t,P)=t+1/(kP)$ es la función potencial. Con deslizadores para $\beta/\gamma$ y $m$ se observaron los tres regímenes del modelo por edades y la recta $A_p=\tfrac m2 t$ de la inmigración constante.
-% [Insertar aquí la captura de GeoGebra con su pie de figura]
+Dos de los modelos se reprodujeron en GeoGebra Clásico con los comandos del archivo \texttt{geogebra/comandos\_geogebra.md} (Fig.~\ref{fig:geogebra}). En la primera construcción, con la población en miles de millones y $k=5{,}34\times10^{-3}$, se dibujaron el campo de pendientes de $P'=kP^2$ con \texttt{CampoDirecciones}, el punto de 1900, $(1900;\,1{,}582)$, y la solución $P=1/[k(T-t)]$ que pasa por él. GeoGebra calculó $T=x(A)+1/(k\,y(A))=2018{,}37$, valor de la función potencial $F(t,P)$ en ese punto, y la curva se dispara junto a la recta $t=T$. La diferencia con $T=2022{,}6$ del ajuste se debe a que aquí se usa un solo punto y no el promedio de 1900-1963, lo que vuelve a mostrar la sensibilidad de la fecha de la explosión.
+
+En la segunda construcción se definió la solución de (\ref{eq:a2}) para los adultos, $A(t)=c_1e^{m_1t}+c_2e^{m_2t}$, con un deslizador $b=\beta/\gamma$. Con $b=1$ (reemplazo) GeoGebra obtuvo $m_1=0$, $m_2=-0{,}08$, $c_1=2.962{,}05$ y $c_2=-233{,}85$: los adultos suben desde 2.728\M\ y se estabilizan en 2.962\M, igual que en el simulador. Al mover el deslizador por encima o por debajo de 1, la curva crece o decrece sin límite, como se anticipó con las raíces del apartado VIII-B.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.48\textwidth]{geogebra_hiperbolico.png}\hfill
+\includegraphics[width=0.48\textwidth]{geogebra_adultos.png}
+\caption{Construcciones en GeoGebra Clásico. (a) Campo de pendientes de $P'=kP^2$ (miles de millones de personas) y solución desde el dato de 1900; la población se dispara junto a la recta $t=T=2018{,}37$. (b) Adultos del modelo por edades con $b=\beta/\gamma=1$ (millones, $t$ en años desde 2020): la curva se estabiliza en 2.962\M.}
+\label{fig:geogebra}
+\end{figure*}
 
 \section{Resultados: escenarios por región}
 Para cada región se aplicó (\ref{eq:rec}) entre 2020 y 2100, con la población de 2020 de los escenarios, y el resultado fue comparado con la ONU (Tabla~\ref{tab:esc} y Fig.~\ref{fig:reg}).
@@ -315,7 +324,7 @@ Nigeria & 459 & 2.265 & 515 & 531 & Reemp.\\
 \end{tabular}
 \end{table}
 
-Ningún escenario se ajusta a todas las regiones. Las regiones que ya tienen tasas negativas (China, Corea del Sur) se asemejan al escenario de fecundidad baja. Colombia y Europa se asemejan a la fecundidad constante, ya que en ambas la fecundidad actual está por debajo del reemplazo \cite{wpp} y mantenerla constante no dispara la población. El escenario constante casi triplica la población mundial porque en África y en parte de Asia se mantiene hoy una fecundidad alta: solo en África se pasaría de 1.341 a 12.677 millones.
+Ningún escenario se ajusta a todas las regiones. Las regiones que ya tienen tasas negativas (China, Corea del Sur) se asemejan al escenario de fecundidad baja. Colombia y Europa se asemejan a la fecundidad constante, ya que en ambas la fecundidad actual está por debajo del reemplazo y mantenerla constante no dispara la población. En Colombia, según el DANE, la tasa global de fecundidad fue de 1,0 hijos por mujer en 2025 \cite{dane}, lejos de los 2,1 del reemplazo. El escenario constante casi triplica la población mundial porque en África y en parte de Asia se mantiene hoy una fecundidad alta: solo en África se pasaría de 1.341 a 12.677 millones.
 
 \begin{figure}[t]
 \centering\includegraphics[width=\columnwidth]{f09_escenarios_regiones.png}
@@ -421,17 +430,18 @@ La dimensión ética del simulador se relaciona con su uso. Con una cifra presen
 La evolución de una población depende tanto de su tasa como de su estructura de edades. Con una ecuación de primer orden se reconstruye bien el pasado reciente, pero la paradoja del reemplazo solo puede ser explicada con el modelo de segundo orden. Para el simulador son suficientes RK4 con paso anual o la integral exacta, y con las pruebas automáticas se detectan errores que pasan inadvertidos tras un buen ajuste. El caso de 1960 muestra que el modelo de von Foerster falló por la interpretación, ya que un ajuste fue leído como si fuera una ley. En un simulador para planear, la incertidumbre debe ser mostrada al usuario.
 
 \begin{thebibliography}{10}\small
-\bibitem{owid} Our World in Data, «Population growth rate», con base en HYDE (2023), Gapminder (2022) y UN WPP (2024). [En línea]. Disponible: https://ourworldindata.org/grapher/population-growth-rate. [Consultado: 6 de nov. de 2026]
-\bibitem{wpp} United Nations, Department of Economic and Social Affairs, Population Division, \textit{World Population Prospects 2019} y \textit{2024}. New York: United Nations. [En línea]. Disponible: https://population.un.org/wpp/. [Consultado: 6 de nov. de 2026]
+\bibitem{owid} Our World in Data, «Population growth rate» (tasa de crecimiento de la población), con base en HYDE, Gapminder y las Perspectivas de la Población Mundial 2024 de la ONU. [En línea]. Disponible: https://ourworldindata.org/grapher/population-growth-rate. [Consultado: 6 de nov. de 2026].
+\bibitem{wpp} Naciones Unidas, Departamento de Asuntos Económicos y Sociales, División de Población, \textit{Perspectivas de la Población Mundial}, revisiones 2019 y 2024. Nueva York: Naciones Unidas. [En línea]. Disponible: https://population.un.org/wpp/. [Consultado: 6 de nov. de 2026].
 \bibitem{foerster} H. von Foerster, P. M. Mora y L. W. Amiot, «Doomsday: Friday, 13 November, A.D. 2026», \textit{Science}, vol. 132, no. 3436, pp. 1291-1295, 1960.
 \bibitem{keyfitz} N. Keyfitz, «On the momentum of population growth», \textit{Demography}, vol. 8, no. 1, pp. 71-80, 1971.
 \bibitem{burden} R. L. Burden y J. D. Faires, \textit{Análisis numérico}, 9.ª ed. México: Cengage Learning, 2011.
 \bibitem{zill} D. G. Zill, \textit{Ecuaciones diferenciales con aplicaciones de modelado}, 10.ª ed. México: Cengage Learning, 2015.
-\bibitem{boyce} W. E. Boyce, R. C. DiPrima y D. B. Meade, \textit{Elementary Differential Equations and Boundary Value Problems}, 11.ª ed. Hoboken, NJ: Wiley, 2017.
+\bibitem{boyce} W. E. Boyce y R. C. DiPrima, \textit{Ecuaciones diferenciales y problemas con valores en la frontera}, 5.ª ed. México: Limusa Wiley, 2012.
 \bibitem{kilpatrick} W. H. Kilpatrick, «The Project Method», \textit{Teachers College Record}, vol. 19, no. 4, pp. 319-335, 1918.
-\bibitem{dewey} J. Dewey, \textit{How We Think}. Boston: D. C. Heath, 1910.
+\bibitem{dewey} J. Dewey, \textit{Cómo pensamos: nueva exposición de la relación entre pensamiento reflexivo y proceso educativo}. Barcelona: Paidós, 1989.
 \bibitem{skovsmose} O. Skovsmose, «Escenarios de investigación», \textit{Revista EMA}, vol. 6, no. 1, pp. 3-26, 2000.
 \bibitem{smil} V. Smil, «China's great famine: 40 years later», \textit{BMJ}, vol. 319, no. 7225, pp. 1619-1621, 1999.
 \bibitem{guia} Universidad de Santander, \textit{Proyecto de Aula PA5: Simulador de escenarios de población}, guía del curso Ecuaciones Diferenciales, 2026B.
+\bibitem{dane} Departamento Administrativo Nacional de Estadística (DANE), «Estadísticas Vitales (EEVV): año acumulado 2025pr», comunicado de prensa, Bogotá, 20 de mar. de 2026. [En línea]. Disponible: https://www.dane.gov.co/files/operaciones/EEVV/2026/20-mar-2026/cp-EEVV-Defunciones-IIsem2025pr.pdf
 \end{thebibliography}
 \end{document}
